@@ -12,7 +12,7 @@ permissions:
 jobs:
   build:
     name: Build and analyze
-    runs-on: ubuntu
+    runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 15
 
     steps:
@@ -23,26 +23,17 @@ jobs:
 
       - name: Check SonarQube connectivity
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: http://localhost:9000
         run: |
-          if [ -z "$SONAR_HOST_URL" ]; then
-            echo "::error::SONAR_HOST_URL secret is missing."
-            exit 1
-          fi
-
           echo "Checking SonarQube server..."
-          curl -sS -L \
+          curl -sS -f \
             --connect-timeout 10 \
             --max-time 20 \
-            -o /dev/null \
-            -w "HTTP status: %{http_code}\n" \
-            "${SONAR_HOST_URL%/}/api/v2/analysis/version" || {
-              echo "::error::Cannot connect to SonarQube. Check the URL, network, and TLS certificate."
-              exit 1
-            }
+            "${SONAR_HOST_URL}/api/system/status"
+          echo "SonarQube endpoint is reachable."
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: http://localhost:9000

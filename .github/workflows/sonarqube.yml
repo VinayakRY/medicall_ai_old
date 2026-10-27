@@ -13,7 +13,7 @@ permissions:
 jobs:
   sonar-analysis:
     name: Analyze Python Code
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
